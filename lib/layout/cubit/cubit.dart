@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:heaaro_company/layout/cubit/states.dart';
-import 'package:heaaro_company/modules/mealLogin.dart';
+import 'package:heaaro_company/modules/loginMeal/mealLogin.dart';
 import 'package:heaaro_company/modules/report.dart';
 import 'package:heaaro_company/modules/settings.dart';
 
-import '../../modules/home.dart';
+import '../../modules/home/home.dart';
 
 
 class AppCubit extends Cubit<AppStates> {
@@ -20,6 +20,28 @@ class AppCubit extends Cubit<AppStates> {
     MealLoginScreen(),
     ReportScreen(),
     SettingsScreen(),
+  ];
+
+  List<String> titles = [
+    'Nutrition Track',
+    'Login Meal',
+    'Progress',
+    'Settings'
+  ];
+
+  List<IconButton> icons = [
+    IconButton(onPressed: (){}, icon: const Icon(
+      Icons.notifications_rounded
+    )),
+    IconButton(onPressed: (){}, icon: const Icon(
+        CupertinoIcons.info_circle_fill
+    )),
+    IconButton(onPressed: (){}, icon: const Icon(
+        CupertinoIcons.info_circle_fill
+    )),
+    IconButton(onPressed: (){}, icon: const Icon(
+        CupertinoIcons.info_circle_fill
+    )),
   ];
 
   List<BottomNavigationBarItem> bottomNav = [

@@ -2,11 +2,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:heaaro_company/layout/cubit/cubit.dart';
+import 'package:heaaro_company/layout/homeLayout.dart';
 import 'package:heaaro_company/modules/onBoarding.dart';
+import 'package:heaaro_company/modules/userDetails/cubit/user_details_cubit.dart';
 import 'package:heaaro_company/shared/blocObserve.dart';
 import 'package:heaaro_company/shared/local/cacheHelper.dart';
 import 'package:heaaro_company/shared/theme.dart';
-
 
 void main() async{
 
@@ -22,20 +24,31 @@ void main() async{
   );
   await CacheHelper.init();
   Bloc.observer = MyBlocObserver();
-
-  runApp(const MyApp(),);
+  var uId = CacheHelper.getData(key: 'uId') ?? '';
+  Widget widget;
+  if(uId == ''){
+    widget = const OnBoard();
+  }else{
+    widget = const AppLayoutScreen();
+  }
+  runApp( MyApp(startWidget: widget,),);
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  final Widget startWidget;
+  const MyApp({super.key, required this.startWidget});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context)=> AppCubit()),
+          BlocProvider(create: (context)=> UserDetailsCubit()..getUserDetails()),
+        ],
+        child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: themeLight,
-      home: OnBoard(),
-    );
+      home: startWidget,
+    ));
   }
 }
 

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:heaaro_company/model/authModel.dart';
 import 'package:heaaro_company/modules/auth_screen/cubit/states.dart';
+import 'package:heaaro_company/shared/constants.dart';
 
 class AuthCubit extends Cubit<AuthStates> {
   AuthCubit() : super(AuthInitial());
@@ -17,6 +18,7 @@ class AuthCubit extends Cubit<AuthStates> {
 }){
     emit(AuthLoginLoadingState());
     FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password).then((onValue){
+      uId = onValue.user!.uid;
       emit(AuthLoginSuccessState());
     }).catchError((onError){
       emit(AuthLoginErrorState());
@@ -24,6 +26,7 @@ class AuthCubit extends Cubit<AuthStates> {
   }
 
   AuthModel? authModel;
+
   void register({
     required String email,
     required String password,
@@ -33,6 +36,7 @@ class AuthCubit extends Cubit<AuthStates> {
     emit(AuthRegisterLoadingState());
     FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password).then((onValue){
       createRegister(email: email, password: password, name: name, location: location, uId: onValue.user!.uid);
+      uId = onValue.user!.uid;
       emit(AuthRegisterSuccessState());
     }).catchError((onError){
       emit(AuthRegisterErrorState());

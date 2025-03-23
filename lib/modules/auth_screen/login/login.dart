@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:heaaro_company/layout/homeLayout.dart';
 import 'package:heaaro_company/modules/auth_screen/register/Register.dart';
+import 'package:heaaro_company/shared/local/cacheHelper.dart';
 import '../../../shared/components.dart';
 import '../../../shared/constants.dart';
 import '../cubit/cubit.dart';
@@ -83,6 +84,8 @@ class LoginScreen extends StatelessWidget {
                       const SizedBox(
                         height: 20,
                       ),
+                     state is AuthLoginLoadingState?
+                      LinearProgressIndicator(color: defaultColor,) :
                      defaultButton(
                               background: defaultColor,
                               height: 58,
@@ -143,7 +146,8 @@ class LoginScreen extends StatelessWidget {
         }, listener: (context, state) {
           if(state is AuthLoginSuccessState)
             {
-              navigateAndFinish(context, HomeLayoutScreen());
+              navigateAndFinish(context, const AppLayoutScreen());
+              CacheHelper.saveData(key: 'uId', value: uId);
             }
         }));
   }

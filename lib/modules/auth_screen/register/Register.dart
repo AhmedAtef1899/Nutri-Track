@@ -1,5 +1,4 @@
 
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:heaaro_company/layout/homeLayout.dart';
 import 'package:heaaro_company/modules/auth_screen/login/login.dart';
+import 'package:heaaro_company/modules/userDetails/userDetails.dart';
 import '../../../shared/components.dart';
 import '../../../shared/constants.dart';
+import '../../../shared/local/cacheHelper.dart';
 import '../cubit/cubit.dart';
 import '../cubit/states.dart';
 
@@ -57,7 +58,6 @@ class RegisterScreen extends StatelessWidget {
                           prefix: CupertinoIcons.person_crop_circle,
                           type: TextInputType.name,
                           controller: nameController,
-                          formatters: [FilteringTextInputFormatter.deny(' ')],
                           validate: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Empty';
@@ -118,6 +118,8 @@ class RegisterScreen extends StatelessWidget {
                       const SizedBox(
                         height: 20,
                       ),
+                      state is AuthRegisterLoadingState?
+                      LinearProgressIndicator(color: defaultColor,) :
                       defaultButton(
                           background: defaultColor,
                           height: 58,
@@ -170,7 +172,8 @@ class RegisterScreen extends StatelessWidget {
           );
         }, listener: (context, state) {
           if(state is AuthRegisterSuccessState){
-            navigateAndFinish(context, HomeLayoutScreen());
+            navigateAndFinish(context, const UserDetailsScreen());
+            CacheHelper.saveData(key: 'uId', value: uId);
           }
         }));
   }

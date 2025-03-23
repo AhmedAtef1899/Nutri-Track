@@ -71,6 +71,11 @@ ThemeData themeLight = ThemeData(
         fontSize: 24,
         color: defaultColor
     ),
+    titleSmall: TextStyle(
+        fontWeight: FontWeight.w500,
+        fontSize: 18,
+        color: Colors.deepOrange
+    ),
     bodyMedium: const TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w400,
@@ -81,6 +86,14 @@ ThemeData themeLight = ThemeData(
         color: defaultColor,
         decoration: TextDecoration.underline,
         decorationColor: defaultColor
+    ),
+    displayLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: Colors.black,
+        decoration: TextDecoration.underline,
+        decorationColor: Colors.black,
+      fontStyle: FontStyle.italic
     ),
   ),
   scaffoldBackgroundColor: Colors.grey[100],
