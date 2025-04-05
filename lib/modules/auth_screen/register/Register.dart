@@ -1,12 +1,12 @@
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:heaaro_company/layout/homeLayout.dart';
 import 'package:heaaro_company/modules/auth_screen/login/login.dart';
-import 'package:heaaro_company/modules/userDetails/userDetails.dart';
+import 'package:heaaro_company/modules/userDetails/user_details.dart';
 import '../../../shared/components.dart';
 import '../../../shared/constants.dart';
 import '../../../shared/local/cacheHelper.dart';
@@ -105,7 +105,11 @@ class RegisterScreen extends StatelessWidget {
                           prefix: FluentIcons.password_16_regular,
                           type: TextInputType.visiblePassword,
                           controller: passwordController,
-                          suffix: CupertinoIcons.eye_slash,
+                          suffix: cubit.isVisible? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                          isVisible: cubit.isVisible,
+                          suffixPressed: (){
+                            cubit.changeVisible();
+                          },
                           formatters: [FilteringTextInputFormatter.deny(' ')],
                           validate: (value) {
                             if (value.isEmpty) {
@@ -134,7 +138,7 @@ class RegisterScreen extends StatelessWidget {
                             }
                           }),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Center(
                         child: Text(
@@ -172,8 +176,12 @@ class RegisterScreen extends StatelessWidget {
           );
         }, listener: (context, state) {
           if(state is AuthRegisterSuccessState){
+            showSnackBar(context: context, msg: 'Register Successfully! 👍', title: 'Sign Up Message', type: ContentType.success);
             navigateAndFinish(context, const UserDetailsScreen());
             CacheHelper.saveData(key: 'uId', value: uId);
+          }
+          if(state is AuthRegisterErrorState){
+            showSnackBar(context: context, msg: state.error, title: 'Register Failed!', type: ContentType.failure);
           }
         }));
   }

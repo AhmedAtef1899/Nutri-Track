@@ -1,5 +1,6 @@
 
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -135,6 +136,31 @@ void navigateAndFinish(context,widget) =>   Navigator.pushAndRemoveUntil(
       return false;
     }
 ) ;
+
+showSnackBar(
+    {required BuildContext context,
+      required String msg,
+      required String title,
+      required ContentType type}) {
+  Future.delayed(
+      const Duration(seconds: 3),
+          () => context.mounted
+          ? ScaffoldMessenger.of(context).clearMaterialBanners()
+          : null);
+  return ScaffoldMessenger.of(context)
+    ..hideCurrentMaterialBanner()
+    ..showMaterialBanner(MaterialBanner(
+        dividerColor: Colors.transparent,
+        actions: const [SizedBox.shrink()],
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 100,
+        content: AwesomeSnackbarContent(
+            inMaterialBanner: true,
+            title: title,
+            message: msg,
+            contentType: type)));
+}
 
 // void showToast({required String msg, ToastState? state}) =>  Fluttertoast.showToast(
 //     msg: msg,

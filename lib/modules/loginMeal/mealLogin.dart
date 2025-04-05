@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:heaaro_company/modules/loginMeal/addMeal/addMeal.dart';
+import 'package:heaaro_company/modules/loginMeal/addMeal/add_meal.dart';
 import 'package:heaaro_company/shared/components.dart';
 
 class MealLoginScreen extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:heaaro_company/layout/cubit/states.dart';
 import 'package:heaaro_company/modules/loginMeal/mealLogin.dart';
-import 'package:heaaro_company/modules/report.dart';
+import 'package:heaaro_company/modules/report/report.dart';
 import 'package:heaaro_company/modules/settings.dart';
 
 import '../../modules/home/home.dart';

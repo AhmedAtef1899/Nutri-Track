@@ -26,6 +26,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
     userDetailsModel = UserDetailsModel(age, health, height, weight);
     FirebaseFirestore.instance.collection('users')
     .doc(userId).collection('details').doc(userId).set(userDetailsModel!.toMap()).then((onValue){
+      getUserDetails();
       emit(UserDetailsAddedSuccessState());
     }).catchError((onError){
       emit(UserDetailsAddedErrorState());

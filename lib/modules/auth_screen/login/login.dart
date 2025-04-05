@@ -1,4 +1,5 @@
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../../../shared/components.dart';
 import '../../../shared/constants.dart';
 import '../cubit/cubit.dart';
 import '../cubit/states.dart';
+import '../forgetPass/forget_password.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -71,7 +73,11 @@ class LoginScreen extends StatelessWidget {
                           prefix: FluentIcons.password_16_regular,
                           type: TextInputType.visiblePassword,
                           controller: passwordController,
-                          suffix: CupertinoIcons.eye_slash,
+                          suffix: cubit.isVisible? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                          isVisible: cubit.isVisible,
+                          suffixPressed: (){
+                            cubit.changeVisible();
+                          },
                           formatters: [FilteringTextInputFormatter.deny(' ')],
                           validate: (value) {
                             if (value.isEmpty) {
@@ -97,7 +103,7 @@ class LoginScreen extends StatelessWidget {
                                 }
                               }),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Center(
                         child: Text(
@@ -113,6 +119,7 @@ class LoginScreen extends StatelessWidget {
                       Center(
                         child: TextButton(
                             onPressed: () {
+                              navigateTo(context, ForgetPasswordScreen());
                             },
                             child: Text(
                               'Forget password?',
@@ -146,9 +153,13 @@ class LoginScreen extends StatelessWidget {
         }, listener: (context, state) {
           if(state is AuthLoginSuccessState)
             {
+              showSnackBar(context: context, msg: "Login Successfully", title: 'Sign In', type: ContentType.success);
               navigateAndFinish(context, const AppLayoutScreen());
               CacheHelper.saveData(key: 'uId', value: uId);
             }
+          if(state is AuthLoginErrorState){
+            showSnackBar(context: context, msg: state.error, title: 'Login Failed!', type: ContentType.failure);
+          }
         }));
   }
 }
