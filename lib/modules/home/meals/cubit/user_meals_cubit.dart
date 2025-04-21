@@ -82,7 +82,7 @@ class UserMealsCubit extends Cubit<UserMealsState> {
     emit(CompletedUserMealsLoading());
     String uid = FirebaseAuth.instance.currentUser!.uid;
     AddMealModel addMealModel = AddMealModel(
-        ingredients: ingredients,age: age,healthCondition: healthCondition,mealTitle: mealTitle,imageUrl: imageUrl,category: category
+        ingredients: ingredients,age: age,healthCondition: healthCondition,mealTitle: mealTitle,imageUrl: imageUrl,category: category,date: DateTime.now()
     );
     FirebaseFirestore.instance
         .collection('users')

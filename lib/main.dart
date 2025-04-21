@@ -2,6 +2,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:heaaro_company/core/config.dart';
 import 'package:heaaro_company/layout/cubit/cubit.dart';
 import 'package:heaaro_company/layout/homeLayout.dart';
 import 'package:heaaro_company/modules/home/meals/cubit/user_meals_cubit.dart';
@@ -25,6 +26,7 @@ void main() async{
   );
   await CacheHelper.init();
   Bloc.observer = MyBlocObserver();
+  await Config.loadLanguage(CacheHelper.getData(key: 'lang') ?? 'English');
   var uId = CacheHelper.getData(key: 'uId') ?? '';
   Widget widget;
   if(uId == ''){
@@ -42,7 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-          BlocProvider(create: (context)=> AppCubit()),
+          BlocProvider(create: (context)=> AppCubit()..getUser()),
           BlocProvider(create: (context)=> UserDetailsCubit()..getUserDetails()),
           BlocProvider(create: (context)=> LoginMealCubit()..getMeals()),
           BlocProvider(create: (context)=> UserMealsCubit()..getUserMeal()),

@@ -16,6 +16,8 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
     required String weight,
     required String height,
     required String health,
+    required String gender,
+    required String bmi,
 }){
     emit(UserDetailsAddedLoadingState());
     final String? userId = FirebaseAuth.instance.currentUser?.uid;
@@ -23,7 +25,7 @@ class UserDetailsCubit extends Cubit<UserDetailsState> {
       emit(UserDetailsGetErrorState());
       return;
     }
-    userDetailsModel = UserDetailsModel(age, health, height, weight);
+    userDetailsModel = UserDetailsModel(age, health, height, weight,gender,bmi);
     FirebaseFirestore.instance.collection('users')
     .doc(userId).collection('details').doc(userId).set(userDetailsModel!.toMap()).then((onValue){
       getUserDetails();

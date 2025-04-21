@@ -59,7 +59,7 @@ import 'constants.dart';
 // );
 
 ThemeData themeLight = ThemeData(
-  fontFamily: 'Gelion',
+  fontFamily: 'Cairo',
   textTheme: TextTheme(
     titleLarge: TextStyle(
         fontSize: 32,
@@ -71,10 +71,14 @@ ThemeData themeLight = ThemeData(
         fontSize: 24,
         color: defaultColor
     ),
-    titleSmall: TextStyle(
+    titleSmall: const TextStyle(
         fontWeight: FontWeight.w500,
         fontSize: 18,
         color: Colors.deepOrange
+    ),
+    bodyLarge: const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
     ),
     bodyMedium: const TextStyle(
       fontSize: 16,
@@ -87,7 +91,7 @@ ThemeData themeLight = ThemeData(
         decoration: TextDecoration.underline,
         decorationColor: defaultColor
     ),
-    displayLarge: TextStyle(
+    displayLarge: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: Colors.black,

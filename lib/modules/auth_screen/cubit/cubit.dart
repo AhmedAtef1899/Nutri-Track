@@ -39,7 +39,7 @@ class AuthCubit extends Cubit<AuthStates> {
   }){
     emit(AuthRegisterLoadingState());
     FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password).then((onValue){
-      createRegister(email: email, password: password, name: name, location: location, uId: onValue.user!.uid);
+      createRegister(email: email, name: name, location: location, uId: onValue.user!.uid);
       uId = onValue.user!.uid;
       emit(AuthRegisterSuccessState());
     }).catchError((onError){
@@ -49,13 +49,12 @@ class AuthCubit extends Cubit<AuthStates> {
 
   void createRegister({
     required String email,
-    required String password,
     required String name,
     required String location,
     required String uId,
   })
   {
-    authModel = AuthModel(name, location, email, password, uId);
+    authModel = AuthModel(name, location, email, uId);
     FirebaseFirestore.instance.collection('users').doc(uId).set(authModel!.toMap()).then((onValue){
       print('User Created');
     }).catchError((onError){

@@ -3,158 +3,170 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:heaaro_company/modules/home/meals/cubit/user_meals_cubit.dart';
 import 'package:heaaro_company/modules/home/meals/cubit/user_meals_state.dart';
 import 'package:heaaro_company/shared/constants.dart';
-
+import '../../../core/config.dart';
 import '../../../model/addMealModel.dart';
+import '../../../shared/local/cacheHelper.dart';
 
 class BreakfastScreen extends StatelessWidget {
   const BreakfastScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserMealsCubit()..getUserMeal(),
-      child: BlocConsumer<UserMealsCubit, UserMealsState>(
-        builder: (context, state) {
-          var cubit = context.watch<UserMealsCubit>();
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                "Meal Details",
-                style: TextStyle(color: Colors.green),
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.green),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: cubit.breakfastItem.isEmpty
-                  ? const Center(child: Text('You don\'t have Meal'))
-                  : ListView.builder(
-                itemCount: cubit.breakfastItem.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _mealItem(cubit.breakfastItem[index],index,state);
-                },
-              ),
-            ),
-          );
-        }, listener: (BuildContext context, UserMealsState state) {
-          if (state is RemoveUserMealsSuccess){
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  "Meal Completed successfully! 🍽️🎉",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    final bool isArabic = CacheHelper.getData(key: 'lang') == "Arabic";
+    return Directionality(
+      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: BlocProvider(
+        create: (context) => UserMealsCubit()..getUserMeal(),
+        child: BlocConsumer<UserMealsCubit, UserMealsState>(
+          listener: (context, state) {
+            if (state is RemoveUserMealsSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    Config.localization["mealCompletedSuccess"] ?? '',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
                 ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                duration: Duration(seconds: 3),
+              );
+            }
+          },
+          builder: (context, state) {
+            var cubit = context.watch<UserMealsCubit>();
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  Config.localization["mealDetails"] ?? '',
+                  style: const TextStyle(color: Colors.green),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.green),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: state is GetUserMealsLoading || state is CompletedUserMealsLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : cubit.breakfastItem.isEmpty
+                    ? Center(child: Text(Config.localization["noMeal"] ?? ''))
+                    : ListView.builder(
+                  itemCount: cubit.breakfastItem.length,
+                  itemBuilder: (context, index) {
+                    return _mealItem(context, cubit.breakfastItem[index], index, state);
+                  },
+                ),
               ),
             );
-          }
-      },
+          },
+        ),
       ),
     );
   }
 
-  Widget _mealItem(AddMealModel model,index,state) => Builder(
-    builder: (context) {
-      double totalCalories = model.ingredients.fold(0, (sum, item) => sum + item.calories);
-      double totalProtein = model.ingredients.fold(0, (sum, item) => sum + item.protein);
-      double totalCarbs = model.ingredients.fold(0, (sum, item) => sum + item.carbs);
+  Widget _mealItem(BuildContext context, AddMealModel model, int index, UserMealsState state) {
+    double totalCalories = model.ingredients.fold(0, (sum, item) => sum + item.calories);
+    double totalProtein = model.ingredients.fold(0, (sum, item) => sum + item.protein);
+    double totalCarbs = model.ingredients.fold(0, (sum, item) => sum + item.carbs);
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: model.imageUrl != null && model.imageUrl!.isNotEmpty
-                ? Image.network(
-              model.imageUrl!,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: 300,
-            )
-                : Container(
-              height: 300,
-              width: double.infinity,
-              color: Colors.grey[300],
-              child: const Center(child: Icon(Icons.image, size: 80, color: Colors.grey)),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: model.imageUrl != null && model.imageUrl!.isNotEmpty
+              ? Image.network(
+            model.imageUrl!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: 300,
+          )
+              : Container(
+            height: 300,
+            width: double.infinity,
+            color: Colors.grey[300],
+            child: const Center(child: Icon(Icons.image, size: 80, color: Colors.grey)),
           ),
-          const SizedBox(height: 10),
-          const Center(
-            child: Text(
-              "Easy - Healthy",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+        ),
+        const SizedBox(height: 10),
+        Center(
+          child: Text(
+            Config.localization["easyHealthy"] ?? '',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
-          Row(
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(child: _infoChip("${totalCalories.toStringAsFixed(0)} ${Config.localization["calories"]}", Colors.green.shade100, Colors.green)),
+            Expanded(child: _infoChip("${totalProtein.toStringAsFixed(1)}g ${Config.localization["protein"]}", Colors.blue.shade100, Colors.blue)),
+            Expanded(child: _infoChip("${totalCarbs.toStringAsFixed(1)}g ${Config.localization["carbs"]}", Colors.orange.shade100, Colors.orange)),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 5)],
+          ),
+          child: Column(
             children: [
-              Expanded(child: _infoChip("$totalCalories Calories", Colors.green.shade100, Colors.green)),
-              Expanded(child: _infoChip("${totalProtein}g Protein", Colors.blue.shade100, Colors.blue)),
-              Expanded(child: _infoChip("${totalCarbs}g Carbs", Colors.orange.shade100, Colors.orange)),
+              _buildTableHeader(),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: model.ingredients.length,
+                itemBuilder: (context, index) {
+                  var ingredient = model.ingredients[index];
+                  return _buildTableRow(
+                    ingredient.name,
+                    "${ingredient.calories} Cal",
+                    "${ingredient.protein}g",
+                    "${ingredient.carbs}g",
+                  );
+                },
+                separatorBuilder: (context, index) => const SizedBox(height: 10),
+              ),
             ],
           ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(color: Colors.grey.shade300, blurRadius: 5),
-              ],
+        ),
+        const SizedBox(height: 20),
+        state is RemoveUserMealsLoading
+            ? LinearProgressIndicator(color: defaultColor)
+            : SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: defaultColor,
+              padding: const EdgeInsets.all(15),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Column(
-              children: [
-                _buildTableHeader(),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: model.ingredients.length,
-                  itemBuilder: (context, index) {
-                    var ingredient = model.ingredients[index];
-                    return _buildTableRow(
-                      ingredient.name,
-                      "${ingredient.calories} Cal",
-                      "${ingredient.protein}g",
-                      "${ingredient.carbs}g",
-                    );
-                  },
-                ),
-              ],
+            onPressed: () {
+              UserMealsCubit.get(context).mealCompleted(
+                age: model.age,
+                healthCondition: model.healthCondition,
+                mealTitle: model.mealTitle,
+                ingredients: model.ingredients,
+                imageUrl: model.imageUrl,
+                category: model.category,
+                mealId: UserMealsCubit.get(context).breakfastIdItem[index],
+              );
+            },
+            child: Text(
+              Config.localization["mealCompleted"] ?? '',
+              style: const TextStyle(fontSize: 18, color: Colors.white),
             ),
           ),
-          const SizedBox(height: 20),
-          state is RemoveUserMealsLoading? LinearProgressIndicator(color: defaultColor,) :
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: defaultColor,
-                padding: const EdgeInsets.all(15),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: () {
-                UserMealsCubit.get(context).mealCompleted(age: model.age,
-                    healthCondition: model.healthCondition,
-                    mealTitle: model.mealTitle,
-                    ingredients: model.ingredients,
-                    imageUrl: model.imageUrl,
-                    category: model.category,
-                    mealId: UserMealsCubit.get(context).breakfastIdItem[index]);
-              },
-              child: const Text("Meal Completed 🤝", style: TextStyle(fontSize: 18, color: Colors.white)),
-            ),
-          ),
-        ],
-      );
-    },
-  );
+        ),
+      ],
+    );
+  }
 
   Widget _infoChip(String label, Color bgColor, Color textColor) {
     return Padding(
@@ -167,15 +179,20 @@ class BreakfastScreen extends StatelessWidget {
   }
 
   Widget _buildTableHeader() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text("Ingredients", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-          Text("Calories", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-          Text("Protein", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-          Text("Carbs", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+          SizedBox(
+              width: 150,
+              child: Text(
+                Config.localization["ingredients"] ?? '',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+              )),
+          Text(Config.localization["calories"] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+          Text(Config.localization["protein"] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+          Text(Config.localization["carbs"] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
         ],
       ),
     );
@@ -187,7 +204,7 @@ class BreakfastScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text(ingredient),
+          SizedBox(width: 150, child: Text(ingredient)),
           Text(calories),
           Text(protein),
           Text(carbs),

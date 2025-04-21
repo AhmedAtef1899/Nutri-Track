@@ -13,6 +13,7 @@ class LoginMealCubit extends Cubit<LoginMealState> {
   List<Ingredient> ingredientItems = [];
   List<AddMealModel> breakfastItems = [];
   List<AddMealModel> lunchItems = [];
+  List<String> lunchItemsId = [];
   List<AddMealModel> dinnerItems = [];
   List<AddMealModel> extraItems = [];
   AddMealModel? addMealModel;
@@ -40,10 +41,12 @@ class LoginMealCubit extends Cubit<LoginMealState> {
     FirebaseFirestore.instance.collection('Lunch').get()
         .then((onValue) {
       lunchItems = [];
+      lunchItemsId = [];
       ingredientItems = [];
       for (var action in onValue.docs) {
         var data = action.data();
         lunchItems.add(AddMealModel.fromJson(data));
+        lunchItemsId.add(action.id);
         if (data.containsKey('ingredients') && data['ingredients'] is List) {
           List<Ingredient> ingredients = (data['ingredients'] as List)
               .map((item) => Ingredient.fromJson(item))
@@ -99,6 +102,7 @@ class LoginMealCubit extends Cubit<LoginMealState> {
     required List<Ingredient> ingredients,
     required String imageUrl,
     required String category,
+    required String bmi,
   }) {
     emit(AddMealLoading());
 
@@ -114,6 +118,7 @@ class LoginMealCubit extends Cubit<LoginMealState> {
           mealTitle: mealTitle,
           imageUrl: imageUrl,
           category: category,
+          bmi: bmi
         );
         FirebaseFirestore.instance
             .collection('users')

@@ -61,7 +61,6 @@ Widget defaultForm(
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        color: Colors.white,
       ),
       child: TextFormField(
         textInputAction: TextInputAction.next,

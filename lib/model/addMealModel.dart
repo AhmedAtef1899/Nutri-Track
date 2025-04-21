@@ -1,50 +1,40 @@
-
 class AddMealModel {
-  String? maxHeight;
-  String? minHeight;
-  String? maxWeight;
-  String? minWeight;
+  String? bmi;
   String? age;
   String? healthCondition;
   String? mealTitle;
   List<Ingredient> ingredients;
   String? imageUrl;
   String? category;
+  DateTime? date; // ✅ Add this line
 
   AddMealModel({
-    this.maxHeight,
-    this.minHeight,
-    this.maxWeight,
-    this.minWeight,
+    this.bmi,
     this.age,
     this.healthCondition,
     this.mealTitle,
     required this.ingredients,
     this.imageUrl,
     this.category,
+    this.date, // ✅ Add this
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'maxHeight': maxHeight,
-      'minHeight': minHeight,
-      'maxWeight': maxWeight,
-      'minWeight': minWeight,
+      'bmi': bmi,
       'age': age,
       'healthCondition': healthCondition,
       'mealTitle': mealTitle,
       'ingredients': ingredients.map((e) => e.toJson()).toList(),
       'imageUrl': imageUrl,
       'category': category,
+      'date': date?.toIso8601String(), // ✅ Add this
     };
   }
 
   factory AddMealModel.fromJson(Map<String, dynamic> json) {
     return AddMealModel(
-      maxHeight: json['maxHeight'],
-      minHeight: json['minHeight'],
-      maxWeight: json['maxWeight'],
-      minWeight: json['minWeight'],
+      bmi: json['bmi'],
       age: json['age'],
       healthCondition: json['healthCondition'],
       mealTitle: json['mealTitle'],
@@ -53,6 +43,7 @@ class AddMealModel {
           .toList(),
       imageUrl: json['imageUrl'],
       category: json['category'],
+      date: json['date'] != null ? DateTime.parse(json['date']) : null, // ✅ Add this
     );
   }
 }

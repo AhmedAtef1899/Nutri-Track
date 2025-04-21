@@ -4,49 +4,74 @@ import 'package:heaaro_company/modules/home/meals/cubit/user_meals_cubit.dart';
 import 'package:heaaro_company/modules/home/meals/cubit/user_meals_state.dart';
 import 'package:heaaro_company/shared/constants.dart';
 
+import '../../../core/config.dart';
 import '../../../model/addMealModel.dart';
+import '../../../shared/local/cacheHelper.dart';
 
 class ExtraScreen extends StatelessWidget {
   const ExtraScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserMealsCubit()..getUserMeal(),
-      child: BlocBuilder<UserMealsCubit, UserMealsState>(
-        builder: (context, state) {
-          var cubit = context.watch<UserMealsCubit>();
+    final bool isArabic = CacheHelper.getData(key: 'lang') == "Arabic";
+    return Directionality(
+      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: BlocProvider(
+        create: (context) => UserMealsCubit()..getUserMeal(),
+        child: BlocConsumer<UserMealsCubit, UserMealsState>(
+          builder: (context, state) {
+            var cubit = context.watch<UserMealsCubit>();
 
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                "Meal Details",
-                style: TextStyle(color: Colors.green),
+            return Scaffold(
+              appBar: AppBar(
+                title:  Text(
+                  Config.localization["mealDetails"] ?? "Your Meal",
+                  style: const TextStyle(color: Colors.green),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.green),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.green),
-                onPressed: () => Navigator.pop(context),
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child:
+                state is GetUserMealsLoading || state is CompletedUserMealsLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    :
+                cubit.extraItem.isEmpty
+                    ?  Center(child: Text(Config.localization["noMeal"] ?? "You don't have Meal",))
+                    : ListView.builder(
+                  itemCount: cubit.extraItem.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _mealItem(cubit.extraItem[index],index);
+                  },
+                ),
               ),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: cubit.extraItem.isEmpty
-                  ? const Center(child: Text('You don\'t have Meal'))
-                  : ListView.builder(
-                itemCount: cubit.extraItem.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _mealItem(cubit.extraItem[index]);
-                },
+            );
+          }, listener: (BuildContext context, UserMealsState state) {
+          if (state is RemoveUserMealsSuccess){
+            ScaffoldMessenger.of(context).showSnackBar(
+               SnackBar(
+                content: Text(
+                  Config.localization["mealCompletedSuccess"] ??
+                      "Meal Completed successfully! 🍽️🎉",
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 3),
               ),
-            ),
-          );
+            );
+          }
         },
+        ),
       ),
     );
   }
 
-  Widget _mealItem(AddMealModel model) => Builder(
+  Widget _mealItem(AddMealModel model,index) => Builder(
     builder: (context) {
       double totalCalories = model.ingredients.fold(0, (sum, item) => sum + item.calories);
       double totalProtein = model.ingredients.fold(0, (sum, item) => sum + item.protein);
@@ -72,18 +97,18 @@ class ExtraScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          const Center(
+           Center(
             child: Text(
-              "Easy - Healthy",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Config.localization["easyHealthy"] ?? "Easy - Healthy",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _infoChip("$totalCalories Calories", Colors.green.shade100, Colors.green)),
-              Expanded(child: _infoChip("${totalProtein}g Protein", Colors.blue.shade100, Colors.blue)),
-              Expanded(child: _infoChip("${totalCarbs}g Carbs", Colors.orange.shade100, Colors.orange)),
+              Expanded(child: _infoChip("${totalCalories.toInt()} ${Config.localization["calories"] ?? "Calories"}", Colors.green.shade100, Colors.green)),
+              Expanded(child: _infoChip("${totalProtein}g ${Config.localization["protein"] ?? "Protein"}", Colors.blue.shade100, Colors.blue)),
+              Expanded(child: _infoChip("${totalCarbs}g ${Config.localization["carbs"] ?? "Carbs"}", Colors.orange.shade100, Colors.orange)),
             ],
           ),
           const SizedBox(height: 20),
@@ -97,9 +122,10 @@ class ExtraScreen extends StatelessWidget {
               ],
             ),
             child: Column(
+              spacing: 10,
               children: [
                 _buildTableHeader(),
-                ListView.builder(
+                ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.ingredients.length,
@@ -111,7 +137,7 @@ class ExtraScreen extends StatelessWidget {
                       "${ingredient.protein}g",
                       "${ingredient.carbs}g",
                     );
-                  },
+                  }, separatorBuilder: (BuildContext context, int index) => const SizedBox(height: 10,),
                 ),
               ],
             ),
@@ -125,8 +151,17 @@ class ExtraScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(15),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              onPressed: () {},
-              child: const Text("Meal Completed 🤝", style: TextStyle(fontSize: 18, color: Colors.white)),
+              onPressed: () {
+                UserMealsCubit.get(context).mealCompleted(
+                    age: model.age,
+                    healthCondition: model.healthCondition,
+                    mealTitle: model.mealTitle,
+                    ingredients: model.ingredients,
+                    imageUrl: model.imageUrl,
+                    category: model.category,
+                    mealId: UserMealsCubit.get(context).extraIdItem[index]);
+              },
+              child:  Text(   Config.localization["mealCompleted"] ?? "Meal Completed 🤝", style: const TextStyle(fontSize: 18, color: Colors.white)),
             ),
           ),
         ],
@@ -145,15 +180,21 @@ class ExtraScreen extends StatelessWidget {
   }
 
   Widget _buildTableHeader() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+    return  Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text("Ingredients", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-          Text("Calories", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-          Text("Protein", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-          Text("Carbs", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+          SizedBox(
+              width: 150,
+              child: Text(Config.localization["ingredients"] ?? "Ingredients",
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green))),
+          Text(Config.localization["calories"] ?? "Calories",
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+          Text(Config.localization["protein"] ?? "Protein",
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+          Text(Config.localization["carbs"] ?? "Carbs",
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
         ],
       ),
     );
@@ -165,7 +206,7 @@ class ExtraScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text(ingredient),
+          SizedBox(width: 150,child: Text(ingredient)),
           Text(calories),
           Text(protein),
           Text(carbs),
